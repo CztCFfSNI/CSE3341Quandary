@@ -2,7 +2,7 @@ package ast;
 
 public abstract class Expr extends ASTNode {
 
-    Expr(Location loc) {
+    protected Expr(Location loc) {
         super(loc);
     }
 }
