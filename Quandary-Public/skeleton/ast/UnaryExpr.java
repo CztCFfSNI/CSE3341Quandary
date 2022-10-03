@@ -21,12 +21,8 @@ public class UnaryExpr extends Expr{
         return expr;
     }
     
-    public String simpleString() {
-        String s = null;
-        switch (operator) {
-            case NEGATIVE:  s = "-"; break;
-        }
-        return s + " " + expr;
+    public String toString() {
+        return "-" + expr;
     }
     
 }

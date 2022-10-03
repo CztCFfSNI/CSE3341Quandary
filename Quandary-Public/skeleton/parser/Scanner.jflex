@@ -47,6 +47,7 @@ import interpreter.Interpreter;
      return symbolFactory.newSymbol("EOF", EOF, new Location(yyline + 1, yycolumn + 1, yychar), new Location(yyline + 1, yycolumn + 1, yychar + 1));
 %eofval}
 
+Ident = [a-zA-Z_$][a-zA-Z0-9_$]*
 
 IntLiteral = 0 | [1-9][0-9]*
 
@@ -58,16 +59,37 @@ white_space = {new_line} | [ \t\f]
 
 <YYINITIAL>{
 /* int literals */
+"int"             { return symbol("int", INT); }
+"return"          { return symbol("return", RETURN); }
+"print"           { return symbol("print", PRINT); }
+"if"              { return symbol("if", IF); }
+"else"            { return symbol("else", ELSE); }
+
 {IntLiteral} { return symbol("Intconst", INTCONST, Long.parseLong(yytext())); }
 
 /* separators */
+";"               { return symbol(";", SEMI); }
+"("               { return symbol("(",  LPAREN); }
+")"               { return symbol(")",  RPAREN); }
+"{"               { return symbol("{", LCURLY); }
+"}"               { return symbol("}", RCURLY); }
+"="               { return symbol("=", EQUAL); }
 "+"               { return symbol("+",  PLUS); }
 "-"               { return symbol("-",  MINUS); }
 "*"               { return symbol("*",  TIMES); }
-"("               { return symbol("(",  LPAREN); }
-")"               { return symbol(")",  RPAREN); }
-"return"          { return symbol("return",  RETURN); }
-";"               { return symbol(";",  SEMI); }
+
+{Ident}           { return symbol("Ident", IDENT, yytext()); }
+
+"<="              { return symbol("<=", LESSEQUAL); }
+">="              { return symbol(">=", LARGEEQUAL); }
+"!="              { return symbol("!=", NOTEQUAL); }
+"=="              { return symbol("==", ISEQUAL); }
+"<"               { return symbol("<", LESS); }
+">"               { return symbol(">", LARGER); }
+"&&"              { return symbol("&&", AND); }
+"||"              { return symbol("||", OR); }
+"!"               { return symbol("!", NOT); }
+
 
 /* comments */
 "/*" [^*] ~"*/" | "/*" "*"+ "/"

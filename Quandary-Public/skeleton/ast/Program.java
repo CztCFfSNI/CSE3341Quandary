@@ -1,21 +1,35 @@
 package ast;
 
+import java.util.*;
 import java.io.PrintStream;
 
 public class Program extends ASTNode {
 
-    final Expr expr;
+    final String func;
+    final String arg;
+    final StmtList sl;
 
-    public Program(Expr expr, Location loc) {
+    public Program(String funcName, String arg, List<Stmt> sl, Location loc) {
         super(loc);
-        this.expr = expr;
+        this.func = funcName;
+        this.arg = arg;
+        this.sl = new StmtList(sl, loc);
     }
 
-    public Expr getExpr() {
-        return expr;
+    public StmtList getSl() {
+        return sl;
     }
 
-    public void println(PrintStream ps) {
-        ps.println(expr);
+    public String getArg() {
+        return arg;
     }
+
+    public String toString() {
+        String s = "int " + func + "(int " + arg + ") " + sl;
+        return s;
+    }
+
+    // public void println(PrintStream ps) {
+    //     ps.println(this.st);
+    // }
 }

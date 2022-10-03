@@ -1,10 +1,13 @@
 package interpreter;
 
 import java.io.*;
+import java.util.HashMap;
 import java.util.Random;
 
 import parser.ParserWrapper;
 import ast.*;
+
+import java.util.*;     // hash map
 
 public class Interpreter {
 
@@ -23,6 +26,8 @@ public class Interpreter {
     public static Interpreter getInterpreter() {
         return interpreter;
     }
+
+    public static final HashMap<String, Long> variables = new HashMap<>();
 
     public static void main(String[] args) {
         String gcType = "NoGC"; // default for skeleton, which only supports NoGC
@@ -102,12 +107,53 @@ public class Interpreter {
     }
 
     Object executeRoot(Program astRoot, long arg) {
-        return evaluate(astRoot.getExpr());
+        variables.put(astRoot.getArg(), arg);
+        StmtList sl = (StmtList)astRoot.getSl();
+        Object ret = null;
+        for (Stmt s : sl.getSl()) {
+            ret = execute(s);
+            if (ret != null) return ret;
+        }
+        return 0;
+    }
+
+    Object execute(Stmt stmt) {
+        if (stmt instanceof DeclStmt) {
+            DeclStmt s = (DeclStmt)stmt;
+            variables.put(s.getIdentifier(), (Long)evaluate(s.getExpr()));
+            return null;
+        } else if (stmt instanceof IfStmt) {
+            IfStmt s = (IfStmt)stmt;
+            if ((Boolean)eval(s.getCond())) return execute(s.getStmt());
+            return null;
+        } else if (stmt instanceof IfElseStmt) {
+            IfElseStmt s = (IfElseStmt)stmt;
+            if ((Boolean)eval(s.getCond())) return execute(s.getIf());
+            else return execute(s.getElse());
+        } else if (stmt instanceof ReturnStmt) {
+            ReturnStmt s = (ReturnStmt)stmt;
+            return (Long)evaluate(s.getExpr());
+        } else if(stmt instanceof PrintStmt) {
+            PrintStmt s = (PrintStmt)stmt;
+            System.out.println((Long)evaluate(s.getExpr()));
+            return null;
+        } else if(stmt instanceof StmtList){
+            StmtList sl = (StmtList)stmt;
+            for (Stmt s : sl.getSl()) {
+                Object temp = execute(s);
+                if (temp != null) return temp;
+            }
+            return null;
+        } else {
+            throw new RuntimeException("Unhandled Expr type");
+        }
     }
 
     Object evaluate(Expr expr) {
         if (expr instanceof ConstExpr) {
             return ((ConstExpr)expr).getValue();
+        } else if (expr instanceof IdentExpr) {
+            return variables.get(((IdentExpr)expr).getValue());
         } else if (expr instanceof BinaryExpr) {
             BinaryExpr binaryExpr = (BinaryExpr)expr;
             switch (binaryExpr.getOperator()) {
@@ -124,6 +170,38 @@ public class Interpreter {
             }
         }
         else {
+            throw new RuntimeException("Unhandled Expr type");
+        }
+    }
+
+    Object eval(Cond cond) {
+        if (cond instanceof CompCond) {
+            CompCond c = (CompCond)cond;
+            Long v1 = (Long)evaluate(c.getLeftExpr());
+            Long v2 = (Long)evaluate(c.getRightExpr());
+            switch (c.getOperator()) {
+                case CompCond.LESSEQUAL: return (Long)evaluate(c.getLeftExpr()) <= (Long)evaluate(c.getRightExpr());
+                case CompCond.LARGEEQUAL: return (Long)evaluate(c.getLeftExpr()) >= (Long)evaluate(c.getRightExpr());
+                case CompCond.ISEQUAL: return v1.equals(v2);
+                case CompCond.NOTEQUAL: return !v1.equals(v2);
+                case CompCond.LESS: return (Long)evaluate(c.getLeftExpr()) < (Long)evaluate(c.getRightExpr());
+                case CompCond.LARGER: return (Long)evaluate(c.getLeftExpr()) > (Long)evaluate(c.getRightExpr());
+                default: throw new RuntimeException("Unhandled operator");
+            }
+        } else if (cond instanceof LogicalCond) {
+            LogicalCond c = (LogicalCond)cond;
+            switch (c.getOperator()) {
+                case LogicalCond.AND: return (Boolean)eval(c.getLeftCond()) && (Boolean)eval(c.getRightCond());
+                case LogicalCond.OR: return (Boolean)eval(c.getLeftCond()) || (Boolean)eval(c.getRightCond());
+                default: throw new RuntimeException("Unhandled operator");
+            }
+        } else if (cond instanceof UnaryCond) {
+            UnaryCond c = (UnaryCond)cond;
+            switch (c.getOperator()) {
+                case UnaryCond.NOT: return !(Boolean)eval(c.getCond());
+                default: throw new RuntimeException("Unhandled operator");
+            }
+        } else {
             throw new RuntimeException("Unhandled Expr type");
         }
     }

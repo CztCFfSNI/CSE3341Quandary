@@ -4,5 +4,5 @@ int main (int arg){
     }else {
         return 2;
     }
-    return 0;
+    return 99;
 }
