@@ -18,14 +18,4 @@ public class StmtList extends Stmt {
     public List<Stmt> getSl() {
         return sl;
     }
-
-    // @Override
-    // public String toString() {
-    //     String s = "{\n\r";
-    //     for (Stmt stmt : sl) {
-    //         s += "\t" + stmt + "\n\r";
-    //     }
-    //     s += "\t}\n\r";
-    //     return s;
-    // }
 }

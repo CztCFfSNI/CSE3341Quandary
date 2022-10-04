@@ -27,10 +27,4 @@ public class IfElseStmt extends Stmt {
         return elseStmt;
     }
 
-    // @Override
-    // public String toString() {
-    //     return "if (" + this.cond.toString() + ") \n\r\t" + this.ifStmt.toString()
-    //         + "\n\r\t" + "else"
-    //         + "\n\r\t" + this.elseStmt.toString();
-    // }
 }

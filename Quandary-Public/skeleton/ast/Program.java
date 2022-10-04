@@ -29,7 +29,4 @@ public class Program extends ASTNode {
         return s;
     }
 
-    // public void println(PrintStream ps) {
-    //     ps.println(this.st);
-    // }
 }

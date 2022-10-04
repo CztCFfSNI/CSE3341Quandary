@@ -18,9 +18,4 @@ public class IfStmt extends Stmt {
     public Stmt getStmt() {
         return stmt;
     }
-
-    // @Override
-    // public String toString() {
-    //     return "if (" + this.cond.toString() + ") \n\r\t" + this.stmt.toString();
-    // }
 }

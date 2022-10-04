@@ -109,9 +109,8 @@ public class Interpreter {
     Object executeRoot(Program astRoot, long arg) {
         variables.put(astRoot.getArg(), arg);
         StmtList sl = (StmtList)astRoot.getSl();
-        Object ret = null;
         for (Stmt s : sl.getSl()) {
-            ret = execute(s);
+            Object ret = execute(s);
             if (ret != null) return ret;
         }
         return 0;
@@ -180,12 +179,12 @@ public class Interpreter {
             Long v1 = (Long)evaluate(c.getLeftExpr());
             Long v2 = (Long)evaluate(c.getRightExpr());
             switch (c.getOperator()) {
-                case CompCond.LESSEQUAL: return (Long)evaluate(c.getLeftExpr()) <= (Long)evaluate(c.getRightExpr());
-                case CompCond.LARGEEQUAL: return (Long)evaluate(c.getLeftExpr()) >= (Long)evaluate(c.getRightExpr());
+                case CompCond.LESSEQUAL: return v1 <= v2;
+                case CompCond.LARGEEQUAL: return v1 >= v2;
                 case CompCond.ISEQUAL: return v1.equals(v2);
                 case CompCond.NOTEQUAL: return !v1.equals(v2);
-                case CompCond.LESS: return (Long)evaluate(c.getLeftExpr()) < (Long)evaluate(c.getRightExpr());
-                case CompCond.LARGER: return (Long)evaluate(c.getLeftExpr()) > (Long)evaluate(c.getRightExpr());
+                case CompCond.LESS: return v1 < v2;
+                case CompCond.LARGER: return v1 > v2;
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else if (cond instanceof LogicalCond) {
