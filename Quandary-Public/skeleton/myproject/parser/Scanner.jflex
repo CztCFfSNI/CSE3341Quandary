@@ -77,6 +77,7 @@ white_space = {new_line} | [ \t\f]
 "+"               { return symbol("+",  PLUS); }
 "-"               { return symbol("-",  MINUS); }
 "*"               { return symbol("*",  TIMES); }
+","               { return symbol(",",  COMMA); }
 
 {Ident}           { return symbol("Ident", IDENT, yytext()); }
 

@@ -39,12 +39,12 @@ public class Lexer implements java_cup.runtime.Scanner, sym {
    * Translates characters to character classes
    */
   private static final String ZZ_CMAP_PACKED = 
-    "\11\0\1\7\1\5\1\0\1\7\1\4\22\0\1\7\1\34\4\0"+
-    "\1\35\1\0\1\22\1\23\1\31\1\27\1\0\1\30\1\0\1\37"+
-    "\1\3\11\2\1\0\1\6\1\32\1\26\1\33\2\0\32\1\4\0"+
+    "\11\0\1\7\1\5\1\0\1\7\1\4\22\0\1\7\1\35\4\0"+
+    "\1\36\1\0\1\22\1\23\1\31\1\27\1\32\1\30\1\0\1\40"+
+    "\1\3\11\2\1\0\1\6\1\33\1\26\1\34\2\0\32\1\4\0"+
     "\1\1\1\0\4\1\1\14\1\17\2\1\1\10\2\1\1\20\1\1"+
     "\1\11\1\1\1\16\1\1\1\13\1\21\1\12\1\15\5\1\1\24"+
-    "\1\36\1\25\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uff92\0";
+    "\1\37\1\25\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uffff\0\uff92\0";
 
   /** 
    * Translates characters to character classes
@@ -59,13 +59,13 @@ public class Lexer implements java_cup.runtime.Scanner, sym {
   private static final String ZZ_ACTION_PACKED_0 =
     "\1\0\1\1\1\2\2\3\2\4\1\5\4\2\1\6"+
     "\1\7\1\10\1\11\1\12\1\13\1\14\1\15\1\16"+
-    "\1\17\1\20\3\1\1\0\1\2\1\21\3\2\1\22"+
-    "\1\23\1\24\1\25\1\26\1\27\1\0\1\30\3\2"+
-    "\2\0\1\2\1\31\1\2\1\0\1\32\1\2\1\33"+
-    "\1\34";
+    "\1\17\1\20\1\21\3\1\1\0\1\2\1\22\3\2"+
+    "\1\23\1\24\1\25\1\26\1\27\1\30\1\0\1\31"+
+    "\3\2\2\0\1\2\1\32\1\2\1\0\1\33\1\2"+
+    "\1\34\1\35";
 
   private static int [] zzUnpackAction() {
-    int [] result = new int[53];
+    int [] result = new int[54];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
@@ -90,16 +90,16 @@ public class Lexer implements java_cup.runtime.Scanner, sym {
   private static final int [] ZZ_ROWMAP = zzUnpackRowMap();
 
   private static final String ZZ_ROWMAP_PACKED_0 =
-    "\0\0\0\40\0\100\0\140\0\40\0\200\0\40\0\40"+
-    "\0\240\0\300\0\340\0\u0100\0\40\0\40\0\40\0\40"+
-    "\0\u0120\0\40\0\40\0\40\0\u0140\0\u0160\0\u0180\0\u01a0"+
-    "\0\u01c0\0\u01e0\0\u0200\0\u0220\0\100\0\u0240\0\u0260\0\u0280"+
-    "\0\40\0\40\0\40\0\40\0\40\0\40\0\u02a0\0\100"+
-    "\0\u02c0\0\u02e0\0\u0300\0\u0320\0\u0340\0\u0360\0\100\0\u0380"+
-    "\0\u03a0\0\40\0\u03c0\0\100\0\100";
+    "\0\0\0\41\0\102\0\143\0\41\0\204\0\41\0\41"+
+    "\0\245\0\306\0\347\0\u0108\0\41\0\41\0\41\0\41"+
+    "\0\u0129\0\41\0\41\0\41\0\41\0\u014a\0\u016b\0\u018c"+
+    "\0\u01ad\0\u01ce\0\u01ef\0\u0210\0\u0231\0\102\0\u0252\0\u0273"+
+    "\0\u0294\0\41\0\41\0\41\0\41\0\41\0\41\0\u02b5"+
+    "\0\102\0\u02d6\0\u02f7\0\u0318\0\u0339\0\u035a\0\u037b\0\102"+
+    "\0\u039c\0\u03bd\0\41\0\u03de\0\102\0\102";
 
   private static int [] zzUnpackRowMap() {
-    int [] result = new int[53];
+    int [] result = new int[54];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
@@ -125,26 +125,26 @@ public class Lexer implements java_cup.runtime.Scanner, sym {
     "\1\2\1\3\1\4\1\5\1\6\1\7\1\10\1\7"+
     "\1\11\2\3\1\12\1\13\1\3\1\14\3\3\1\15"+
     "\1\16\1\17\1\20\1\21\1\22\1\23\1\24\1\25"+
-    "\1\26\1\27\1\30\1\31\1\32\41\0\3\3\4\0"+
-    "\12\3\20\0\2\4\41\0\1\33\33\0\3\3\4\0"+
-    "\1\3\1\34\5\3\1\35\2\3\17\0\3\3\4\0"+
-    "\4\3\1\36\5\3\17\0\3\3\4\0\10\3\1\37"+
-    "\1\3\17\0\3\3\4\0\3\3\1\40\6\3\44\0"+
-    "\1\41\37\0\1\42\37\0\1\43\37\0\1\44\46\0"+
-    "\1\45\40\0\1\46\32\0\1\47\14\0\1\7\32\0"+
-    "\3\3\4\0\2\3\1\50\7\3\17\0\3\3\4\0"+
-    "\2\3\1\51\7\3\17\0\3\3\4\0\11\3\1\52"+
-    "\17\0\3\3\4\0\1\53\11\3\16\0\31\54\1\55"+
-    "\6\54\1\0\3\3\4\0\5\3\1\56\4\3\17\0"+
-    "\3\3\4\0\4\3\1\57\5\3\17\0\3\3\4\0"+
-    "\1\3\1\60\10\3\16\0\31\54\1\61\6\54\31\0"+
-    "\1\55\5\0\1\62\1\0\3\3\4\0\3\3\1\63"+
-    "\6\3\17\0\3\3\4\0\2\3\1\64\7\3\16\0"+
-    "\31\54\1\61\5\54\1\62\1\0\3\3\4\0\1\3"+
-    "\1\65\10\3\16\0";
+    "\1\26\1\27\1\30\1\31\1\32\1\33\42\0\3\3"+
+    "\4\0\12\3\21\0\2\4\42\0\1\34\34\0\3\3"+
+    "\4\0\1\3\1\35\5\3\1\36\2\3\20\0\3\3"+
+    "\4\0\4\3\1\37\5\3\20\0\3\3\4\0\10\3"+
+    "\1\40\1\3\20\0\3\3\4\0\3\3\1\41\6\3"+
+    "\45\0\1\42\40\0\1\43\40\0\1\44\40\0\1\45"+
+    "\50\0\1\46\41\0\1\47\32\0\1\50\15\0\1\7"+
+    "\33\0\3\3\4\0\2\3\1\51\7\3\20\0\3\3"+
+    "\4\0\2\3\1\52\7\3\20\0\3\3\4\0\11\3"+
+    "\1\53\20\0\3\3\4\0\1\54\11\3\17\0\31\55"+
+    "\1\56\7\55\1\0\3\3\4\0\5\3\1\57\4\3"+
+    "\20\0\3\3\4\0\4\3\1\60\5\3\20\0\3\3"+
+    "\4\0\1\3\1\61\10\3\17\0\31\55\1\62\7\55"+
+    "\31\0\1\56\6\0\1\63\1\0\3\3\4\0\3\3"+
+    "\1\64\6\3\20\0\3\3\4\0\2\3\1\65\7\3"+
+    "\17\0\31\55\1\62\6\55\1\63\1\0\3\3\4\0"+
+    "\1\3\1\66\10\3\17\0";
 
   private static int [] zzUnpackTrans() {
-    int [] result = new int[992];
+    int [] result = new int[1023];
     int offset = 0;
     offset = zzUnpackTrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
@@ -183,11 +183,11 @@ public class Lexer implements java_cup.runtime.Scanner, sym {
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
     "\1\0\1\11\2\1\1\11\1\1\2\11\4\1\4\11"+
-    "\1\1\3\11\6\1\1\0\5\1\6\11\1\0\4\1"+
+    "\1\1\4\11\6\1\1\0\5\1\6\11\1\0\4\1"+
     "\2\0\3\1\1\0\1\11\3\1";
 
   private static int [] zzUnpackAttribute() {
-    int [] result = new int[53];
+    int [] result = new int[54];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
@@ -679,142 +679,147 @@ public class Lexer implements java_cup.runtime.Scanner, sym {
             { /*error("Illegal character <" + yytext() + ">");*/ Interpreter.fatalError("Illegal character <" + yytext() + ">", Interpreter.EXIT_PARSING_ERROR);
             } 
             // fall through
-          case 29: break;
+          case 30: break;
           case 2: 
             { return symbol("Ident", IDENT, yytext());
             } 
             // fall through
-          case 30: break;
+          case 31: break;
           case 3: 
             { return symbol("Intconst", INTCONST, Long.parseLong(yytext()));
             } 
             // fall through
-          case 31: break;
+          case 32: break;
           case 4: 
             { /* ignore */
             } 
             // fall through
-          case 32: break;
+          case 33: break;
           case 5: 
             { return symbol(";", SEMI);
             } 
             // fall through
-          case 33: break;
+          case 34: break;
           case 6: 
             { return symbol("(",  LPAREN);
             } 
             // fall through
-          case 34: break;
+          case 35: break;
           case 7: 
             { return symbol(")",  RPAREN);
             } 
             // fall through
-          case 35: break;
+          case 36: break;
           case 8: 
             { return symbol("{", LCURLY);
             } 
             // fall through
-          case 36: break;
+          case 37: break;
           case 9: 
             { return symbol("}", RCURLY);
             } 
             // fall through
-          case 37: break;
+          case 38: break;
           case 10: 
             { return symbol("=", EQUAL);
             } 
             // fall through
-          case 38: break;
+          case 39: break;
           case 11: 
             { return symbol("+",  PLUS);
             } 
             // fall through
-          case 39: break;
+          case 40: break;
           case 12: 
             { return symbol("-",  MINUS);
             } 
             // fall through
-          case 40: break;
+          case 41: break;
           case 13: 
             { return symbol("*",  TIMES);
             } 
             // fall through
-          case 41: break;
-          case 14: 
-            { return symbol("<", LESS);
-            } 
-            // fall through
           case 42: break;
-          case 15: 
-            { return symbol(">", LARGER);
+          case 14: 
+            { return symbol(",",  COMMA);
             } 
             // fall through
           case 43: break;
-          case 16: 
-            { return symbol("!", NOT);
+          case 15: 
+            { return symbol("<", LESS);
             } 
             // fall through
           case 44: break;
-          case 17: 
-            { return symbol("if", IF);
+          case 16: 
+            { return symbol(">", LARGER);
             } 
             // fall through
           case 45: break;
-          case 18: 
-            { return symbol("==", ISEQUAL);
+          case 17: 
+            { return symbol("!", NOT);
             } 
             // fall through
           case 46: break;
-          case 19: 
-            { return symbol("<=", LESSEQUAL);
+          case 18: 
+            { return symbol("if", IF);
             } 
             // fall through
           case 47: break;
-          case 20: 
-            { return symbol(">=", LARGEEQUAL);
+          case 19: 
+            { return symbol("==", ISEQUAL);
             } 
             // fall through
           case 48: break;
-          case 21: 
-            { return symbol("!=", NOTEQUAL);
+          case 20: 
+            { return symbol("<=", LESSEQUAL);
             } 
             // fall through
           case 49: break;
-          case 22: 
-            { return symbol("&&", AND);
+          case 21: 
+            { return symbol(">=", LARGEEQUAL);
             } 
             // fall through
           case 50: break;
-          case 23: 
-            { return symbol("||", OR);
+          case 22: 
+            { return symbol("!=", NOTEQUAL);
             } 
             // fall through
           case 51: break;
-          case 24: 
-            { return symbol("int", INT);
+          case 23: 
+            { return symbol("&&", AND);
             } 
             // fall through
           case 52: break;
-          case 25: 
-            { return symbol("else", ELSE);
+          case 24: 
+            { return symbol("||", OR);
             } 
             // fall through
           case 53: break;
-          case 26: 
-            { /* ignore comments */
+          case 25: 
+            { return symbol("int", INT);
             } 
             // fall through
           case 54: break;
-          case 27: 
-            { return symbol("print", PRINT);
+          case 26: 
+            { return symbol("else", ELSE);
             } 
             // fall through
           case 55: break;
-          case 28: 
-            { return symbol("return", RETURN);
+          case 27: 
+            { /* ignore comments */
             } 
             // fall through
           case 56: break;
+          case 28: 
+            { return symbol("print", PRINT);
+            } 
+            // fall through
+          case 57: break;
+          case 29: 
+            { return symbol("return", RETURN);
+            } 
+            // fall through
+          case 58: break;
           default:
             zzScanError(ZZ_NO_MATCH);
         }

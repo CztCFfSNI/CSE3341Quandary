@@ -27,7 +27,7 @@ parser code {:
 
 :};
 
-terminal PLUS, MINUS, TIMES;
+terminal PLUS, MINUS, TIMES, COMMA;
 terminal LPAREN, RPAREN;
 terminal LCURLY, RCURLY;
 terminal RETURN, PRINT, SEMI;
@@ -45,6 +45,12 @@ non terminal BinaryExpr      binaryExpr;
 non terminal Cond            cond;
 non terminal Stmt            stmt;
 non terminal List<Stmt>      stmtList;
+non terminal FunctionDefinition     funcDef;
+non terminal List<FunctionDefinition> funcDefList;
+non terminal List<String>           formalDeclList;
+non terminal List<String>           neFormalDeclList;
+non terminal List<Expr>             exprList;
+non terminal List<Expr>             neExprList;
 
 precedence left PRINT;
 precedence left IF;
@@ -57,9 +63,29 @@ precedence left TIMES;
 
 start with program;
 
-program ::= INT IDENT:funcName LPAREN INT IDENT:argName RPAREN LCURLY stmtList:sl RCURLY
-            {: RESULT = new Program(funcName, argName, sl, loc(slleft, slright)); :}
+program ::= funcDefList:fdl
+            {: RESULT = new Program(fdl, loc(fdlleft, fdlright)); :}
          ;
+
+funcDefList ::= funcDef:fd funcDefList:fdl 
+               {: fdl.add(0, fd); RESULT = fdl; :}
+            |  {: RESULT = new ArrayList<FunctionDefinition>(); :}    
+            ;
+            
+funcDef ::= INT IDENT:funcName LPAREN formalDeclList:fdl RPAREN LCURLY stmtList:sl RCURLY
+            {: RESULT = new FunctionDefinition(funcName, fdl, sl, loc(slleft, slright)); :}
+         ;
+
+formalDeclList ::= neFormalDeclList:nfdl
+                     {: RESULT = nfdl; :}
+                  |  {: RESULT = new ArrayList<String>(); :}
+                  ;
+
+neFormalDeclList ::= INT IDENT:i COMMA neFormalDeclList:nfdl
+                     {: nfdl.add(0, i); RESULT = nfdl; :}
+                  |  INT IDENT:i
+                     {: List<String> nfd = new ArrayList<String>(); nfd.add(0, i); RESULT = nfd; :}
+                  ;
 
 stmtList ::= stmt:st stmtList:sl
             {: sl.add(0, st); RESULT = sl; :}
@@ -80,10 +106,23 @@ stmt ::= INT IDENT:i EQUAL expr:e SEMI
          {: RESULT = new StmtList(sl, loc(slleft, slright)); :}
       ;
 
+exprList ::= neExprList:nel
+                  {: RESULT = nel; :}
+               |  {: RESULT = new ArrayList<Expr>(); :}
+               ;
+
+neExprList ::= expr:e COMMA neExprList:nel
+                  {: nel.add(0, e); RESULT = nel; :}
+               | expr:e
+                  {: List<Expr> nel = new ArrayList<Expr>(); nel.add(0, e); RESULT = nel; :}
+               ;
+
 expr ::= INTCONST:c
          {: RESULT = new ConstExpr(c, loc(cleft, cright)); :}
       |  IDENT:c
          {: RESULT = new IdentExpr(c, loc(cleft, cright)); :}
+      |  IDENT:i LPAREN exprList:el RPAREN
+         {: RESULT = new FunctionCallExpr(i, el, loc(ileft, iright)); :}
       |  binaryExpr:e
          {: RESULT = e; :}
       |  LPAREN expr:e RPAREN

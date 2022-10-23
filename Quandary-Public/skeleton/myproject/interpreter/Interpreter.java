@@ -27,14 +27,15 @@ public class Interpreter {
         return interpreter;
     }
 
-    public static final HashMap<String, Long> variables = new HashMap<>();
+    public static final HashMap<String, Object> variables = new HashMap<>();
+    public static final HashMap<String, FunctionDefinition> functions = new HashMap<>();
 
     public static void main(String[] args) {
         String gcType = "NoGC"; // default for skeleton, which only supports NoGC
         long heapBytes = 1 << 14;
         int i = 0;
         String filename;
-        long quandaryArg;
+        Long quandaryArg;
         try {
             for (; i < args.length; i++) {
                 String arg = args[i];
@@ -106,40 +107,46 @@ public class Interpreter {
         }
     }
 
-    Object executeRoot(Program astRoot, long arg) {
-        variables.put(astRoot.getArg(), arg);
-        StmtList sl = (StmtList)astRoot.getSl();
+    Object executeRoot(Program astRoot, Long arg) {
+        FunctionDefinitionList fdl = (FunctionDefinitionList)astRoot.getFL();
+        for (FunctionDefinition f : fdl.getFL()) {
+            functions.put(f.getFunctionName(), f);
+        }
+
+        FunctionDefinition mainFunction = fdl.getMain();
+        mainFunction.getVariables().put(mainFunction.getParams().get(0), arg);
+        StmtList sl = (StmtList)mainFunction.getSl();
         for (Stmt s : sl.getSl()) {
-            Object ret = execute(s);
+            Object ret = execute(s, mainFunction);
             if (ret != null) return ret;
         }
         return 0;
     }
 
-    Object execute(Stmt stmt) {
+    Object execute(Stmt stmt, FunctionDefinition function) {
         if (stmt instanceof DeclStmt) {
             DeclStmt s = (DeclStmt)stmt;
-            variables.put(s.getIdentifier(), (Long)evaluate(s.getExpr()));
+            function.getVariables().put(s.getIdentifier(), (Long)evaluate(s.getExpr(), function));
             return null;
         } else if (stmt instanceof IfStmt) {
             IfStmt s = (IfStmt)stmt;
-            if ((Boolean)eval(s.getCond())) return execute(s.getStmt());
+            if ((Boolean)eval(s.getCond(), function)) return execute(s.getStmt(), function);
             return null;
         } else if (stmt instanceof IfElseStmt) {
             IfElseStmt s = (IfElseStmt)stmt;
-            if ((Boolean)eval(s.getCond())) return execute(s.getIf());
-            else return execute(s.getElse());
+            if ((Boolean)eval(s.getCond(), function)) return execute(s.getIf(), function);
+            else return execute(s.getElse(), function);
         } else if (stmt instanceof ReturnStmt) {
             ReturnStmt s = (ReturnStmt)stmt;
-            return (Long)evaluate(s.getExpr());
+            return (Long)evaluate(s.getExpr(), function);
         } else if(stmt instanceof PrintStmt) {
             PrintStmt s = (PrintStmt)stmt;
-            System.out.println((Long)evaluate(s.getExpr()));
+            System.out.println((Long)evaluate(s.getExpr(), function));
             return null;
         } else if(stmt instanceof StmtList){
             StmtList sl = (StmtList)stmt;
             for (Stmt s : sl.getSl()) {
-                Object temp = execute(s);
+                Object temp = execute(s, function);
                 if (temp != null) return temp;
             }
             return null;
@@ -148,23 +155,50 @@ public class Interpreter {
         }
     }
 
-    Object evaluate(Expr expr) {
+    Object evaluate(Expr expr, FunctionDefinition localFunction) {
         if (expr instanceof ConstExpr) {
             return ((ConstExpr)expr).getValue();
         } else if (expr instanceof IdentExpr) {
-            return variables.get(((IdentExpr)expr).getValue());
+            return localFunction.getVariables().get(((IdentExpr)expr).getValue());
+        } else if (expr instanceof FunctionCallExpr) {
+            FunctionCallExpr functionCallExpr = (FunctionCallExpr)expr;
+            String funcName = functionCallExpr.getFuncName();
+            List<Expr> arguments = functionCallExpr.getArgu();
+            FunctionDefinition func = null;
+            func = functions.get(funcName);
+
+            if (funcName.equals("randomInt")) {
+                long num;
+                if (arguments.get(0) instanceof ConstExpr) num = (long)((ConstExpr) arguments.get(0)).getValue();
+                else num = (long)localFunction.getVariables().get(((IdentExpr)arguments.get(0)).getValue());
+                return (long)(num * Math.random());
+            }
+            if (func != null) {
+                FunctionDefinition function = new FunctionDefinition(funcName, new ArrayList<String>(), func.getSl().getSl(), func.getLoc());
+                List<String> params = func.getParams();
+                HashMap<String, Object> localVariables = function.getVariables();
+                for (int i = 0;i < params.size();i++) {
+                    localVariables.put(params.get(i), (Long)evaluate(arguments.get(i), localFunction));
+                }
+                StmtList sl = (StmtList)function.getSl();
+                for (Stmt s : sl.getSl()) {
+                    Object ret = execute(s, function);
+                    if (ret != null) return ret;
+                }
+            } 
+            return null;
         } else if (expr instanceof BinaryExpr) {
             BinaryExpr binaryExpr = (BinaryExpr)expr;
             switch (binaryExpr.getOperator()) {
-                case BinaryExpr.PLUS: return (Long)evaluate(binaryExpr.getLeftExpr()) + (Long)evaluate(binaryExpr.getRightExpr());
-                case BinaryExpr.MINUS: return (Long)evaluate(binaryExpr.getLeftExpr()) - (Long)evaluate(binaryExpr.getRightExpr());
-                case BinaryExpr.TIMES: return (Long)evaluate(binaryExpr.getLeftExpr()) * (Long)evaluate(binaryExpr.getRightExpr());
+                case BinaryExpr.PLUS: return (Long)evaluate(binaryExpr.getLeftExpr(), localFunction) + (Long)evaluate(binaryExpr.getRightExpr(), localFunction);
+                case BinaryExpr.MINUS: return (Long)evaluate(binaryExpr.getLeftExpr(), localFunction) - (Long)evaluate(binaryExpr.getRightExpr(), localFunction);
+                case BinaryExpr.TIMES: return (Long)evaluate(binaryExpr.getLeftExpr(), localFunction) * (Long)evaluate(binaryExpr.getRightExpr(), localFunction);
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else if (expr instanceof UnaryExpr) {
             UnaryExpr unaryExpr = (UnaryExpr)expr;
             switch (unaryExpr.getOperator()) {
-                case UnaryExpr.NEGATIVE: return -1 * (Long)evaluate(unaryExpr.getExpr());
+                case UnaryExpr.NEGATIVE: return -1 * (Long)evaluate(unaryExpr.getExpr(), localFunction);
                 default: throw new RuntimeException("Unhandled operator");
             }
         }
@@ -173,11 +207,11 @@ public class Interpreter {
         }
     }
 
-    Object eval(Cond cond) {
+    Object eval(Cond cond, FunctionDefinition localFunction) {
         if (cond instanceof CompCond) {
             CompCond c = (CompCond)cond;
-            Long v1 = (Long)evaluate(c.getLeftExpr());
-            Long v2 = (Long)evaluate(c.getRightExpr());
+            Long v1 = (Long)evaluate(c.getLeftExpr(), localFunction);
+            Long v2 = (Long)evaluate(c.getRightExpr(), localFunction);
             switch (c.getOperator()) {
                 case CompCond.LESSEQUAL: return v1 <= v2;
                 case CompCond.LARGEEQUAL: return v1 >= v2;
@@ -190,14 +224,14 @@ public class Interpreter {
         } else if (cond instanceof LogicalCond) {
             LogicalCond c = (LogicalCond)cond;
             switch (c.getOperator()) {
-                case LogicalCond.AND: return (Boolean)eval(c.getLeftCond()) && (Boolean)eval(c.getRightCond());
-                case LogicalCond.OR: return (Boolean)eval(c.getLeftCond()) || (Boolean)eval(c.getRightCond());
+                case LogicalCond.AND: return (Boolean)eval(c.getLeftCond(), localFunction) && (Boolean)eval(c.getRightCond(), localFunction);
+                case LogicalCond.OR: return (Boolean)eval(c.getLeftCond(), localFunction) || (Boolean)eval(c.getRightCond(), localFunction);
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else if (cond instanceof UnaryCond) {
             UnaryCond c = (UnaryCond)cond;
             switch (c.getOperator()) {
-                case UnaryCond.NOT: return !(Boolean)eval(c.getCond());
+                case UnaryCond.NOT: return !(Boolean)eval(c.getCond(), localFunction);
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else {
