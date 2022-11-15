@@ -4,29 +4,32 @@ import java.util.HashMap;
 import java.util.List;
 
 import ast.Location;
+import ast.QVal;
 import ast.Stmt;
 
 public class FunctionDefinition extends ASTNode {
 
-    final String funcName;
-    final List<String> params;
+    final VarDecl v;
+    final List<VarDecl> params;
     final StmtList stmts;
     final Location loc;
-    final HashMap<String, Object> variables = new HashMap<>();
+    final HashMap<String, QVal> variables = new HashMap<>();
+    final HashMap<String, VarDecl.TYPE> typeMap = new HashMap<>();
+    final HashMap<String, Boolean> mutMap = new HashMap<>();
 
-    public FunctionDefinition(String funcName, List<String> params, List<Stmt> stmts, Location loc) {
+    public FunctionDefinition(VarDecl v, List<VarDecl> params, List<Stmt> stmts, Location loc) {
         super(loc);
         this.loc = loc;
-        this.funcName = funcName;
+        this.v = v;
         this.params = params;
         this.stmts = new StmtList(stmts, loc);
     }
 
-    public String getFunctionName() {
-        return funcName;
+    public VarDecl getVar() {
+        return v;
     }
 
-    public List<String> getParams() {
+    public List<VarDecl> getParams() {
         return params;
     }
 
@@ -38,8 +41,16 @@ public class FunctionDefinition extends ASTNode {
         return loc;
     }
 
-    public HashMap<String, Object> getVariables() {
+    public HashMap<String, QVal> getVariables() {
         return variables;
+    }
+
+    public HashMap<String, VarDecl.TYPE> getType() {
+        return typeMap;
+    }
+
+    public HashMap<String, Boolean> getMut() {
+        return mutMap;
     }
 
 }

@@ -21,7 +21,7 @@ public class FunctionDefinitionList extends ASTNode {
     public FunctionDefinition getMain() {
         if (functionDefs != null && functionDefs.size() > 0) {
             for (int i = 0; i < functionDefs.size(); i++) {
-                if (functionDefs.get(i).getFunctionName().equals(mainFunction)) {
+                if (functionDefs.get(i).getVar().getIdent().equals(mainFunction)) {
                     return functionDefs.get(i);
                 }
             }

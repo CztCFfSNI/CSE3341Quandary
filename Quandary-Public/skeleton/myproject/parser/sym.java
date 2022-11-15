@@ -9,33 +9,40 @@ package parser;
 public interface sym {
   /* terminals */
   public static final int TIMES = 4;
-  public static final int AND = 23;
-  public static final int IDENT = 27;
-  public static final int ELSE = 16;
+  public static final int AND = 27;
+  public static final int IDENT = 34;
+  public static final int ELSE = 19;
   public static final int PLUS = 2;
-  public static final int OR = 24;
-  public static final int RPAREN = 7;
-  public static final int INT = 13;
-  public static final int EQUAL = 14;
-  public static final int NOTEQUAL = 19;
-  public static final int SEMI = 12;
-  public static final int NOT = 25;
-  public static final int RCURLY = 9;
-  public static final int RETURN = 10;
-  public static final int INTCONST = 26;
-  public static final int IF = 15;
-  public static final int LESSEQUAL = 17;
-  public static final int LPAREN = 6;
-  public static final int LARGER = 22;
-  public static final int LCURLY = 8;
-  public static final int ISEQUAL = 20;
+  public static final int INT = 30;
+  public static final int OR = 28;
+  public static final int RPAREN = 8;
+  public static final int EQUAL = 17;
+  public static final int NOTEQUAL = 23;
+  public static final int WHILE = 20;
+  public static final int SEMI = 13;
+  public static final int NOT = 29;
+  public static final int RCURLY = 10;
+  public static final int Q = 31;
+  public static final int RETURN = 11;
+  public static final int INTCONST = 33;
+  public static final int REF = 32;
+  public static final int IF = 18;
+  public static final int LESSEQUAL = 21;
+  public static final int LPAREN = 7;
+  public static final int NIL = 15;
+  public static final int CAST = 16;
+  public static final int LARGER = 26;
+  public static final int LCURLY = 9;
+  public static final int ISEQUAL = 24;
   public static final int COMMA = 5;
   public static final int EOF = 0;
-  public static final int LARGEEQUAL = 18;
+  public static final int LARGEEQUAL = 22;
   public static final int MINUS = 3;
-  public static final int PRINT = 11;
+  public static final int PRINT = 12;
   public static final int error = 1;
-  public static final int LESS = 21;
+  public static final int DOT = 6;
+  public static final int MUT = 14;
+  public static final int LESS = 25;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -43,6 +50,7 @@ public interface sym {
   "MINUS",
   "TIMES",
   "COMMA",
+  "DOT",
   "LPAREN",
   "RPAREN",
   "LCURLY",
@@ -50,10 +58,13 @@ public interface sym {
   "RETURN",
   "PRINT",
   "SEMI",
-  "INT",
+  "MUT",
+  "NIL",
+  "CAST",
   "EQUAL",
   "IF",
   "ELSE",
+  "WHILE",
   "LESSEQUAL",
   "LARGEEQUAL",
   "NOTEQUAL",
@@ -63,6 +74,9 @@ public interface sym {
   "AND",
   "OR",
   "NOT",
+  "INT",
+  "Q",
+  "REF",
   "INTCONST",
   "IDENT"
   };

@@ -27,7 +27,7 @@ public class Interpreter {
         return interpreter;
     }
 
-    public static final HashMap<String, Object> variables = new HashMap<>();
+    public static final HashMap<String, Object> mainVariables = new HashMap<>();
     public static final HashMap<String, FunctionDefinition> functions = new HashMap<>();
 
     public static void main(String[] args) {
@@ -83,7 +83,7 @@ public class Interpreter {
         //astRoot.println(System.out);
         interpreter = new Interpreter(astRoot);
         interpreter.initMemoryManager(gcType, heapBytes);
-        String returnValueAsString = interpreter.executeRoot(astRoot, quandaryArg).toString();
+        String returnValueAsString = interpreter.executeRoot(astRoot, new QInt(quandaryArg)).toString();
         System.out.println("Interpreter returned " + returnValueAsString);
     }
 
@@ -107,26 +107,46 @@ public class Interpreter {
         }
     }
 
-    Object executeRoot(Program astRoot, Long arg) {
+    QVal executeRoot(Program astRoot, QVal arg) {
         FunctionDefinitionList fdl = (FunctionDefinitionList)astRoot.getFL();
         for (FunctionDefinition f : fdl.getFL()) {
-            functions.put(f.getFunctionName(), f);
+            functions.put(f.getVar().getIdent(), f);
         }
 
         FunctionDefinition mainFunction = fdl.getMain();
-        mainFunction.getVariables().put(mainFunction.getParams().get(0), arg);
+        VarDecl vd = mainFunction.getVar();
+        mainFunction.getVariables().put(mainFunction.getParams().get(0).getIdent(), arg);
+        mainFunction.getType().put(vd.getIdent(), vd.getType());
+        if (vd.checkIsMut()) mainFunction.getMut().put(vd.getIdent(), true);
+        else mainFunction.getMut().put(vd.getIdent(), false);
+
         StmtList sl = (StmtList)mainFunction.getSl();
         for (Stmt s : sl.getSl()) {
-            Object ret = execute(s, mainFunction);
+            QVal ret = execute(s, mainFunction);
             if (ret != null) return ret;
         }
-        return 0;
+        return new QInt(0);
     }
 
-    Object execute(Stmt stmt, FunctionDefinition function) {
-        if (stmt instanceof DeclStmt) {
+    QVal execute(Stmt stmt, FunctionDefinition function) {
+        if (stmt instanceof VarDeclStmt) {
+            VarDeclStmt s = (VarDeclStmt)stmt;
+            VarDecl vd = s.getVar();
+            // if ((evaluate(s.getExpr(), function) instanceof QRef && vd.getType().equals(VarDecl.TYPE.INT)) ||
+            //     (evaluate(s.getExpr(), function) instanceof QInt && vd.getType().equals(VarDecl.TYPE.REF)))  throw new RuntimeException("Wrong Type!");
+            function.getVariables().put(vd.getIdent(), evaluate(s.getExpr(), function));
+            function.getType().put(vd.getIdent(), vd.getType());
+            if (vd.checkIsMut()) function.getMut().put(vd.getIdent(), true);
+            else function.getMut().put(vd.getIdent(), false);
+            return null;
+        } else if (stmt instanceof DeclStmt) {
             DeclStmt s = (DeclStmt)stmt;
-            function.getVariables().put(s.getIdentifier(), (Long)evaluate(s.getExpr(), function));
+            // if (function.getMut().get(s.getIdentifier())) {
+            //    function.getVariables().put(s.getIdentifier(), evaluate(s.getExpr(), function)); 
+            //    System.out.println(1321);
+            // }
+            // else throw new RuntimeException("It's immutable!");
+            function.getVariables().put(s.getIdentifier(), evaluate(s.getExpr(), function)); 
             return null;
         } else if (stmt instanceof IfStmt) {
             IfStmt s = (IfStmt)stmt;
@@ -136,30 +156,59 @@ public class Interpreter {
             IfElseStmt s = (IfElseStmt)stmt;
             if ((Boolean)eval(s.getCond(), function)) return execute(s.getIf(), function);
             else return execute(s.getElse(), function);
+        } else if (stmt instanceof WhileStmt) {
+            WhileStmt s = (WhileStmt)stmt;
+            while ((Boolean)eval(s.getCond(), function)) {
+                QVal temp = execute(s.getStmt(), function);
+                if (temp != null) return temp;
+            }
+            return null;
         } else if (stmt instanceof ReturnStmt) {
             ReturnStmt s = (ReturnStmt)stmt;
-            return (Long)evaluate(s.getExpr(), function);
+            return evaluate(s.getExpr(), function);
         } else if(stmt instanceof PrintStmt) {
             PrintStmt s = (PrintStmt)stmt;
-            System.out.println((Long)evaluate(s.getExpr(), function));
+            System.out.println(evaluate(s.getExpr(), function).toString());
             return null;
         } else if(stmt instanceof StmtList){
             StmtList sl = (StmtList)stmt;
             for (Stmt s : sl.getSl()) {
-                Object temp = execute(s, function);
+                QVal temp = execute(s, function);
                 if (temp != null) return temp;
             }
+            return null;
+        } else if(stmt instanceof FunctionCallStmt) {
+            FunctionCallStmt s = (FunctionCallStmt)stmt;
+            FunctionCallExpr e = s.getFCE();
+            evaluate(e, function);
             return null;
         } else {
             throw new RuntimeException("Unhandled Expr type");
         }
     }
 
-    Object evaluate(Expr expr, FunctionDefinition localFunction) {
+    QVal evaluate(Expr expr, FunctionDefinition localFunction) {
         if (expr instanceof ConstExpr) {
-            return ((ConstExpr)expr).getValue();
+            if (((ConstExpr)expr).getValue() instanceof Long) return new QInt((long)((ConstExpr)expr).getValue());
+            else if (((ConstExpr)expr).getValue() == null) return new QRef(null);
+            throw new RuntimeException("Not QInt or Nil!");
         } else if (expr instanceof IdentExpr) {
-            return localFunction.getVariables().get(((IdentExpr)expr).getValue());
+            return (QVal)((localFunction.getVariables().get(((IdentExpr)expr).getValue())));
+        } else if (expr instanceof CastExpr) {
+            CastExpr castExpr = (CastExpr)expr;
+            //VarDecl.TYPE t = castExpr.getType();
+            //Expr e = castExpr.getExpr();
+            System.out.println(castExpr.getType().equals(VarDecl.TYPE.INT));
+            if (castExpr.getType().equals(VarDecl.TYPE.INT)) {
+                return ((QInt)evaluate(castExpr.getExpr(), localFunction));
+            } else if (castExpr.getType().equals(VarDecl.TYPE.REF)) {
+                return ((QRef)evaluate(castExpr.getExpr(), localFunction));
+            }
+            else return evaluate(castExpr.getExpr(), localFunction);
+            //System.out.println(((QInt)evaluate(castExpr.getExpr(), localFunction)).equals(new QRef(null))); 
+            //if (evaluate(castExpr, localFunction).equals(new QRef(null)))System.out.println(31221); 
+            //localFunction.getType().put(castExpr.getExpr().toString(), castExpr.getType());
+            //return (QRef)(localFunction.getVariables().get(castExpr.getExpr().toString()));
         } else if (expr instanceof FunctionCallExpr) {
             FunctionCallExpr functionCallExpr = (FunctionCallExpr)expr;
             String funcName = functionCallExpr.getFuncName();
@@ -170,35 +219,50 @@ public class Interpreter {
             if (funcName.equals("randomInt")) {
                 long num;
                 if (arguments.get(0) instanceof ConstExpr) num = (long)((ConstExpr) arguments.get(0)).getValue();
-                else num = (long)localFunction.getVariables().get(((IdentExpr)arguments.get(0)).getValue());
-                return (long)(num * Math.random());
+                else {
+                    String temp1 = ((IdentExpr)arguments.get(0)).getValue();
+                    QInt temp2 = (QInt)localFunction.getVariables().get(temp1);
+                    num = temp2.returnQInt();
+                }
+                return new QInt((long)(num * Math.random()));
             }
+            if (funcName.equals("isNil")) return isNil(arguments.get(0), localFunction);
+            if (funcName.equals("isAtom")) return isAtom(arguments.get(0), localFunction);
+            if (funcName.equals("setLeft")) return setLeft(arguments.get(0), arguments.get(1), localFunction);
+            if (funcName.equals("setRight")) return setRight(arguments.get(0), arguments.get(1), localFunction);
+            if (funcName.equals("left")) return left(arguments.get(0), localFunction);
+            if (funcName.equals("right")) return right(arguments.get(0), localFunction);
+
             if (func != null) {
-                FunctionDefinition function = new FunctionDefinition(funcName, new ArrayList<String>(), func.getSl().getSl(), func.getLoc());
-                List<String> params = func.getParams();
-                HashMap<String, Object> localVariables = function.getVariables();
+                FunctionDefinition function = new FunctionDefinition(func.getVar(), new ArrayList<VarDecl>(), func.getSl().getSl(), func.getLoc());
+                List<VarDecl> params = func.getParams();
+                HashMap<String, QVal> localVariables = function.getVariables();
                 for (int i = 0;i < params.size();i++) {
-                    localVariables.put(params.get(i), (Long)evaluate(arguments.get(i), localFunction));
+                    localVariables.put(params.get(i).getIdent(), evaluate(arguments.get(i), localFunction));
                 }
                 StmtList sl = (StmtList)function.getSl();
                 for (Stmt s : sl.getSl()) {
-                    Object ret = execute(s, function);
-                    if (ret != null) return ret;
+                    QVal ret = execute(s, function);
+                    if (ret != null) {
+                        //System.out.println(300000);
+                        return ret;}
                 }
             } 
             return null;
         } else if (expr instanceof BinaryExpr) {
             BinaryExpr binaryExpr = (BinaryExpr)expr;
             switch (binaryExpr.getOperator()) {
-                case BinaryExpr.PLUS: return (Long)evaluate(binaryExpr.getLeftExpr(), localFunction) + (Long)evaluate(binaryExpr.getRightExpr(), localFunction);
-                case BinaryExpr.MINUS: return (Long)evaluate(binaryExpr.getLeftExpr(), localFunction) - (Long)evaluate(binaryExpr.getRightExpr(), localFunction);
-                case BinaryExpr.TIMES: return (Long)evaluate(binaryExpr.getLeftExpr(), localFunction) * (Long)evaluate(binaryExpr.getRightExpr(), localFunction);
+                case BinaryExpr.PLUS: return new QInt(((QInt)evaluate(binaryExpr.getLeftExpr(), localFunction)).returnQInt() + ((QInt)evaluate(binaryExpr.getRightExpr(), localFunction)).returnQInt());
+                case BinaryExpr.MINUS: return new QInt(((QInt)evaluate(binaryExpr.getLeftExpr(), localFunction)).returnQInt() - ((QInt)evaluate(binaryExpr.getRightExpr(), localFunction)).returnQInt());
+                case BinaryExpr.TIMES: return new QInt(((QInt)evaluate(binaryExpr.getLeftExpr(), localFunction)).returnQInt() * ((QInt)evaluate(binaryExpr.getRightExpr(), localFunction)).returnQInt());
+                case BinaryExpr.DOT: 
+                return new QRef(new QObj(evaluate(binaryExpr.getLeftExpr(), localFunction), evaluate(binaryExpr.getRightExpr(), localFunction)));
                 default: throw new RuntimeException("Unhandled operator");
             }
         } else if (expr instanceof UnaryExpr) {
             UnaryExpr unaryExpr = (UnaryExpr)expr;
             switch (unaryExpr.getOperator()) {
-                case UnaryExpr.NEGATIVE: return -1 * (Long)evaluate(unaryExpr.getExpr(), localFunction);
+                case UnaryExpr.NEGATIVE: return new QInt(-1 * ((QInt)evaluate(unaryExpr.getExpr(), localFunction)).returnQInt());
                 default: throw new RuntimeException("Unhandled operator");
             }
         }
@@ -210,8 +274,8 @@ public class Interpreter {
     Object eval(Cond cond, FunctionDefinition localFunction) {
         if (cond instanceof CompCond) {
             CompCond c = (CompCond)cond;
-            Long v1 = (Long)evaluate(c.getLeftExpr(), localFunction);
-            Long v2 = (Long)evaluate(c.getRightExpr(), localFunction);
+            Long v1 = ((QInt)evaluate(c.getLeftExpr(), localFunction)).returnQInt();
+            Long v2 = ((QInt)evaluate(c.getRightExpr(), localFunction)).returnQInt();
             switch (c.getOperator()) {
                 case CompCond.LESSEQUAL: return v1 <= v2;
                 case CompCond.LARGEEQUAL: return v1 >= v2;
@@ -237,6 +301,46 @@ public class Interpreter {
         } else {
             throw new RuntimeException("Unhandled Expr type");
         }
+    }
+
+    QVal left (Expr e, FunctionDefinition f) {
+        return ((QRef)evaluate(e, f)).referent.left;
+    }
+
+    QVal right (Expr e, FunctionDefinition f) {
+        return ((QRef)evaluate(e, f)).referent.right;
+    }
+
+    QInt isNil (Expr e, FunctionDefinition f) {
+        QVal x = evaluate(e, f);
+        if (x instanceof QInt) {
+            return new QInt(0);
+        } else if (x instanceof QRef) {
+            if (((QRef)x).referent == null) return new QInt(1);
+            else return new QInt(0);
+        } else throw new RuntimeException("isNil Exception!");
+    }
+
+    QInt isAtom (Expr e, FunctionDefinition f) {
+        QVal x = evaluate(e, f);
+        if (x instanceof QInt) {
+            return new QInt(1);
+        } else if (x instanceof QRef) {
+            if (((QRef)x).referent == null) return new QInt(1);
+            else return new QInt(0);
+        } else throw new RuntimeException("isNil Exception!");
+    }
+
+    QInt setLeft (Expr e1, Expr e2, FunctionDefinition f) {
+        ((QRef)evaluate(e1, f)).referent.left = evaluate(e2, f);
+        //f.getVariables().put(((IdentExpr)e1).getValue(), new QRef(new QObj(evaluate(e2, f), right(e1, f))));
+        return new QInt(1);
+    }
+
+    QInt setRight (Expr e1, Expr e2, FunctionDefinition f) {
+        ((QRef)evaluate(e1, f)).referent.right = evaluate(e2, f);
+        //f.getVariables().put(((IdentExpr)e1).getValue(), new QRef(new QObj(left(e1, f), evaluate(e2, f))));
+        return new QInt(1);
     }
 
 	public static void fatalError(String message, int processReturnCode) {
