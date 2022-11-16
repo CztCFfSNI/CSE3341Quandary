@@ -116,9 +116,12 @@ public class Interpreter {
         FunctionDefinition mainFunction = fdl.getMain();
         VarDecl vd = mainFunction.getVar();
         mainFunction.getVariables().put(mainFunction.getParams().get(0).getIdent(), arg);
-        mainFunction.getType().put(vd.getIdent(), vd.getType());
-        if (vd.checkIsMut()) mainFunction.getMut().put(vd.getIdent(), true);
-        else mainFunction.getMut().put(vd.getIdent(), false);
+
+        for (VarDecl v : mainFunction.getParams()) {
+            mainFunction.getType().put(v.getIdent(), v.getType());
+            if (v.checkIsMut()) mainFunction.getMut().put(v.getIdent(), true);
+            else mainFunction.getMut().put(v.getIdent(), false);
+        }
 
         StmtList sl = (StmtList)mainFunction.getSl();
         for (Stmt s : sl.getSl()) {
@@ -132,8 +135,6 @@ public class Interpreter {
         if (stmt instanceof VarDeclStmt) {
             VarDeclStmt s = (VarDeclStmt)stmt;
             VarDecl vd = s.getVar();
-            // if ((evaluate(s.getExpr(), function) instanceof QRef && vd.getType().equals(VarDecl.TYPE.INT)) ||
-            //     (evaluate(s.getExpr(), function) instanceof QInt && vd.getType().equals(VarDecl.TYPE.REF)))  throw new RuntimeException("Wrong Type!");
             function.getVariables().put(vd.getIdent(), evaluate(s.getExpr(), function));
             function.getType().put(vd.getIdent(), vd.getType());
             if (vd.checkIsMut()) function.getMut().put(vd.getIdent(), true);
@@ -141,12 +142,9 @@ public class Interpreter {
             return null;
         } else if (stmt instanceof DeclStmt) {
             DeclStmt s = (DeclStmt)stmt;
-            // if (function.getMut().get(s.getIdentifier())) {
-            //    function.getVariables().put(s.getIdentifier(), evaluate(s.getExpr(), function)); 
-            //    System.out.println(1321);
-            // }
-            // else throw new RuntimeException("It's immutable!");
             function.getVariables().put(s.getIdentifier(), evaluate(s.getExpr(), function)); 
+            // if (function.getMut().get(s.getIdentifier())) function.getVariables().put(s.getIdentifier(), evaluate(s.getExpr(), function)); 
+            // else throw new RuntimeException("It's immutable!");
             return null;
         } else if (stmt instanceof IfStmt) {
             IfStmt s = (IfStmt)stmt;
@@ -216,16 +214,7 @@ public class Interpreter {
             FunctionDefinition func = null;
             func = functions.get(funcName);
 
-            if (funcName.equals("randomInt")) {
-                long num;
-                if (arguments.get(0) instanceof ConstExpr) num = (long)((ConstExpr) arguments.get(0)).getValue();
-                else {
-                    String temp1 = ((IdentExpr)arguments.get(0)).getValue();
-                    QInt temp2 = (QInt)localFunction.getVariables().get(temp1);
-                    num = temp2.returnQInt();
-                }
-                return new QInt((long)(num * Math.random()));
-            }
+            if (funcName.equals("randomInt")) return randomInt(arguments.get(0), localFunction);
             if (funcName.equals("isNil")) return isNil(arguments.get(0), localFunction);
             if (funcName.equals("isAtom")) return isAtom(arguments.get(0), localFunction);
             if (funcName.equals("setLeft")) return setLeft(arguments.get(0), arguments.get(1), localFunction);
@@ -244,7 +233,6 @@ public class Interpreter {
                 for (Stmt s : sl.getSl()) {
                     QVal ret = execute(s, function);
                     if (ret != null) {
-                        //System.out.println(300000);
                         return ret;}
                 }
             } 
@@ -301,6 +289,11 @@ public class Interpreter {
         } else {
             throw new RuntimeException("Unhandled Expr type");
         }
+    }
+
+    QVal randomInt (Expr e, FunctionDefinition f) {
+        if (e instanceof ConstExpr) return new QInt((long)(((long)((ConstExpr)e).getValue()) * Math.random()));
+        else return new QInt((long)((((QInt)f.getVariables().get(((IdentExpr)e).getValue())).returnQInt()) * Math.random()));
     }
 
     QVal left (Expr e, FunctionDefinition f) {
