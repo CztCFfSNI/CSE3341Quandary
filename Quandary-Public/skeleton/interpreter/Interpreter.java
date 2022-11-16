@@ -317,7 +317,7 @@ public class Interpreter {
         QVal x = evaluate(e, f);
         if (x instanceof QInt) return new QInt(1);
         else if (x instanceof QRef) return isNil(e, f);
-        else throw new RuntimeException("isNil Exception!");
+        else throw new RuntimeException("isAtom Exception!");
     }
 
     QInt setLeft (Expr e1, Expr e2, FunctionDefinition f) {
