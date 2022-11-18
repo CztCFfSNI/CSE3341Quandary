@@ -8,12 +8,12 @@ mutable int main (int arg) {
  
 mutable Ref MarkSweep(mutable int n) {
     if (n < 0) n = 0;
-    Ref r = nil . nil;
-    mutable Ref temp = r;
+    mutable Ref r1 = nil . nil;
+    mutable Ref r2 = r1;
     while (n > 0) {
         n = n - 1;
-        setRight(temp, nil . nil);
-        temp = (Ref)right(temp);
+        setRight(r2, nil . nil);
+        r2 = (Ref)right(r2);
     }
     return nil;
 }
@@ -32,13 +32,13 @@ mutable int RefCount(mutable int n) {
 
 mutable Ref ExplicitMemoryManagement(mutable int n) {
     if (n < 0) n = 0;
-    Ref r = nil . nil;
-    mutable Ref temp = r;
+    mutable Ref r1 = nil . nil;
+    mutable Ref r2 = r1;
     while (n > 0) {
         n = n - 1;
-        setRight(temp, nil . nil);
-        temp = (Ref)right(temp);
-        free(temp);
+        setRight(r2, nil . nil);
+        r2 = (Ref)right(r2);
+        free(r2);
     }
     return nil;
 }
