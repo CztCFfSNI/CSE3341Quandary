@@ -1,13 +1,13 @@
 mutable int main (int arg) {
-    if (arg == 1) OOMforMarkSweep(16);
-    else if (arg == 2) OOMforRefCount(1000);
-    else if (arg == 3) OOMforMarkSweepButNotExplicit(20);
-    else if (arg == 4) OOMforRefCount(12);
+    if (arg == 1) MarkSweep(16);
+    else if (arg == 2) RefCount(1000);
+    else if (arg == 3) ExplicitMemoryManagement(20);
+    else if (arg == 4) RefCount(12);
     else print(arg);
     return 1776;
 }
  
-mutable Ref OOMforMarkSweep(mutable int n) {
+mutable Ref MarkSweep(mutable int n) {
     if (n < 0) n = 0;
     Ref r = (nil . nil);
     mutable Ref temp = r;
@@ -19,7 +19,7 @@ mutable Ref OOMforMarkSweep(mutable int n) {
     return r;
 }
 
-mutable int OOMforRefCount(mutable int n) {
+mutable int RefCount(mutable int n) {
     if (n < 0) n = 0;
     while (n > 0) {
         Ref a = (1 . nil);
@@ -31,7 +31,7 @@ mutable int OOMforRefCount(mutable int n) {
     return 1776;
 }
 
-mutable Ref OOMforMarkSweepButNotExplicit(mutable int n) {
+mutable Ref ExplicitMemoryManagement(mutable int n) {
     if (n < 0) n = 0;
     Ref r = (nil . nil);
     mutable Ref temp = r;
