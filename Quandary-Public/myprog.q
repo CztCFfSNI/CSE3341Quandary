@@ -1,46 +1,44 @@
 mutable int main (int arg) {
     if (arg == 1) MarkSweep(16);
-    else if (arg == 2) RefCount(1000);
-    else if (arg == 3) ExplicitMemoryManagement(20);
-    else if (arg == 4) RefCount(12);
-    else print(arg);
-    return 1776;
+    if (arg == 2) RefCount(9999);
+    if (arg == 3) ExplicitMemoryManagement(16);
+    if (arg == 4) RefCount(10);
+    return 0;
 }
  
 mutable Ref MarkSweep(mutable int n) {
     if (n < 0) n = 0;
-    Ref r = (nil . nil);
+    Ref r = nil . nil;
     mutable Ref temp = r;
     while (n > 0) {
+        n = n - 1;
         setRight(temp, (nil . nil));
         temp = (Ref)right(temp);
-        n = n - 1;
     }
-    return r;
+    return nil;
 }
 
 mutable int RefCount(mutable int n) {
     if (n < 0) n = 0;
     while (n > 0) {
-        Ref a = (1 . nil);
-        Ref b = (2 . nil);
-        setRight(a, b);
-        setRight(b, a);
         n = n - 1;
+        Ref r1 = nil . nil;
+        Ref r2 = nil . nil;
+        setRight(r1, r2);
+        setRight(r2, r1);
     }
-    return 1776;
+    return 1;
 }
 
 mutable Ref ExplicitMemoryManagement(mutable int n) {
     if (n < 0) n = 0;
-    Ref r = (nil . nil);
+    Ref r = nil . nil;
     mutable Ref temp = r;
     while (n > 0) {
-        setRight(temp, (nil . nil));
-        Ref oldTemp = temp;
-        temp = (Ref)right(temp);
-        free(oldTemp);
         n = n - 1;
+        setRight(temp, (nil . nil));
+        temp = (Ref)right(temp);
+        free(temp);
     }
-    return r;
+    return nil;
 }
