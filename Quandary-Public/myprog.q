@@ -12,7 +12,7 @@ mutable Ref MarkSweep(mutable int n) {
     mutable Ref temp = r;
     while (n > 0) {
         n = n - 1;
-        setRight(temp, (nil . nil));
+        setRight(temp, nil . nil);
         temp = (Ref)right(temp);
     }
     return nil;
@@ -36,7 +36,7 @@ mutable Ref ExplicitMemoryManagement(mutable int n) {
     mutable Ref temp = r;
     while (n > 0) {
         n = n - 1;
-        setRight(temp, (nil . nil));
+        setRight(temp, nil . nil);
         temp = (Ref)right(temp);
         free(temp);
     }
