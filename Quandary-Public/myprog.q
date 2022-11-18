@@ -7,7 +7,6 @@ mutable int main (int arg) {
 }
  
 mutable Ref MarkSweep(mutable int n) {
-    if (n < 0) n = 0;
     mutable Ref r1 = nil . nil;
     mutable Ref r2 = r1;
     while (n > 0) {
@@ -19,7 +18,6 @@ mutable Ref MarkSweep(mutable int n) {
 }
 
 mutable int RefCount(mutable int n) {
-    if (n < 0) n = 0;
     while (n > 0) {
         n = n - 1;
         Ref r1 = nil . nil;
@@ -31,7 +29,6 @@ mutable int RefCount(mutable int n) {
 }
 
 mutable Ref ExplicitMemoryManagement(mutable int n) {
-    if (n < 0) n = 0;
     mutable Ref r1 = nil . nil;
     mutable Ref r2 = r1;
     while (n > 0) {
