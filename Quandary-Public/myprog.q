@@ -2,7 +2,7 @@ mutable int main (int arg) {
     if (arg == 1) MarkSweep(16);
     if (arg == 2) RefCount(666);
     if (arg == 3) ExplicitMemoryManagement(16);
-    if (arg == 4) RefCount(10);
+    if (arg == 4) RefCount(9);
     return 0;
 }
  
