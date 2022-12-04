@@ -78,6 +78,8 @@ white_space = {new_line} | [ \t\f]
 ";"               { return symbol(";", SEMI); }
 "("               { return symbol("(",  LPAREN); }
 ")"               { return symbol(")",  RPAREN); }
+"["               { return symbol("[",  LBRACKET); }
+"]"               { return symbol("]",  RBRACKET); }
 "{"               { return symbol("{", LCURLY); }
 "}"               { return symbol("}", RCURLY); }
 "="               { return symbol("=", EQUAL); }

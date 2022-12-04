@@ -28,8 +28,7 @@ parser code {:
 :};
 
 terminal PLUS, MINUS, TIMES, COMMA, DOT;
-terminal LPAREN, RPAREN;
-terminal LCURLY, RCURLY;
+terminal LPAREN, RPAREN, LBRACKET, RBRACKET, LCURLY, RCURLY;
 terminal RETURN, PRINT, SEMI, MUT, NIL, CAST;
 terminal EQUAL;
 terminal IF, ELSE, WHILE;
@@ -159,6 +158,8 @@ expr ::= NIL:n
          {: RESULT = fce; :}
       |  binaryExpr:e
          {: RESULT = e; :}
+      |  LBRACKET binaryExpr:e RBRACKET
+         {: RESULT = new ConcurBinaryExpr(e, loc(eleft, eright)); :}
       |  LPAREN expr:e RPAREN
          {: RESULT = e; :}
       |  MINUS expr:e

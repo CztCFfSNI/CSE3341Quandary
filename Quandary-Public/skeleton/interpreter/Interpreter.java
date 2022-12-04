@@ -185,7 +185,7 @@ public class Interpreter {
         }
     }
 
-    QVal evaluate(Expr expr, FunctionDefinition localFunction) {
+    public QVal evaluate(Expr expr, FunctionDefinition localFunction) {
         if (expr instanceof ConstExpr) {
             if (((ConstExpr)expr).getValue() instanceof Long) return new QInt((long)((ConstExpr)expr).getValue());
             else if (((ConstExpr)expr).getValue() == null) return new QRef(null);
@@ -221,6 +221,8 @@ public class Interpreter {
             if (funcName.equals("setRight")) return setRight(arguments.get(0), arguments.get(1), localFunction);
             if (funcName.equals("left")) return left(arguments.get(0), localFunction);
             if (funcName.equals("right")) return right(arguments.get(0), localFunction);
+            if (funcName.equals("acq")) return acquire(arguments.get(0), localFunction);
+            if (funcName.equals("rel")) return release(arguments.get(0), localFunction);
 
             if (func != null) {
                 FunctionDefinition function = new FunctionDefinition(func.getVar(), new ArrayList<VarDecl>(), func.getSl().getSl(), func.getLoc());
@@ -253,9 +255,29 @@ public class Interpreter {
                 case UnaryExpr.NEGATIVE: return new QInt(-1 * ((QInt)evaluate(unaryExpr.getExpr(), localFunction)).returnQInt());
                 default: throw new RuntimeException("Unhandled operator");
             }
+        } else if (expr instanceof ConcurBinaryExpr) {
+            BinaryExpr binaryExpr = ((ConcurBinaryExpr)expr).getExpr();
+            QThread left = new QThread(binaryExpr.getLeftExpr(), localFunction);
+            QThread right = new QThread(binaryExpr.getRightExpr(), localFunction);
+            left.start();
+            right.start();
+            try {
+                left.join();
+                right.join();
+            } catch (InterruptedException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            switch (binaryExpr.getOperator()) {
+                case BinaryExpr.PLUS: return new QInt(((QInt)left.v).value + ((QInt)right.v).value);
+                case BinaryExpr.MINUS: return new QInt(((QInt)left.v).value - ((QInt)right.v).value);
+                case BinaryExpr.TIMES: return new QInt(((QInt)left.v).value * ((QInt)right.v).value);
+                case BinaryExpr.DOT: return new QRef(new QObj(left.v, right.v));
+                default: throw new RuntimeException("Unhandled operator!");
+            }
         }
         else {
-            throw new RuntimeException("Unhandled Expr type");
+            throw new RuntimeException("Unhandled!");
         }
     }
 
@@ -329,6 +351,16 @@ public class Interpreter {
     QInt setRight (Expr e1, Expr e2, FunctionDefinition f) {
         ((QRef)evaluate(e1, f)).referent.right = evaluate(e2, f);
         //f.getVariables().put(((IdentExpr)e1).getValue(), new QRef(new QObj(left(e1, f), evaluate(e2, f))));
+        return new QInt(1);
+    }
+
+    QInt acquire (Expr e, FunctionDefinition f) {
+        ((QRef)evaluate(e, f)).acq();
+        return new QInt(1);
+    }
+
+    QInt release (Expr e, FunctionDefinition f) {
+        ((QRef)evaluate(e, f)).rel();
         return new QInt(1);
     }
 
