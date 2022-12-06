@@ -177,8 +177,7 @@ public class Interpreter {
             return null;
         } else if(stmt instanceof FunctionCallStmt) {
             FunctionCallStmt s = (FunctionCallStmt)stmt;
-            FunctionCallExpr e = s.getFCE();
-            evaluate(e, function);
+            evaluate(s.getFCE(), function);
             return null;
         } else {
             throw new RuntimeException("Unhandled Expr type");
@@ -234,8 +233,7 @@ public class Interpreter {
                 StmtList sl = (StmtList)function.getSl();
                 for (Stmt s : sl.getSl()) {
                     QVal ret = execute(s, function);
-                    if (ret != null) {
-                        return ret;}
+                    if (ret != null) return ret;
                 }
             } 
             return null;
